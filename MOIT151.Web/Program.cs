@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.AspNetCore;
+using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Security;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,7 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+builder.Services.AddAuthorization();
 
 builder.Services.AddOpenApiDocument(options =>
 {
@@ -29,9 +31,8 @@ builder.Services.AddOpenApiDocument(options =>
     options.Title = "CreditZone";
     options.Description = "CreditZone API";
     options.Version = "v1";
-    options.DocumentProcessors.Add(new SecurityDefinitionAppender(
-        "Bearer",
-        new OpenApiSecurityScheme
+    options.OperationProcessors.Add(new OperationSecurityScopeProcessor("Bearer"));
+    options.AddSecurity("Bearer", new OpenApiSecurityScheme
         {
             Description = "JWT Token from Auth0",
             Name = "Authorization",
@@ -50,7 +51,7 @@ builder.Services.AddOpenApiDocument(options =>
                     AuthorizationUrl = "https://ewan.au.auth0.com/authorize?audience=https://ewan/api"
                 }
             }
-        })
+        }
     );
 });
 
@@ -61,6 +62,8 @@ var app = builder.Build();
 app.MapOpenApi();
 
 app.UseHttpsRedirection();
+
+app.UseAuthorization();
 
 
 var summaries = new[]
@@ -80,6 +83,7 @@ app.MapGet("/weatherforecast", () =>
             .ToArray();
         return forecast;
     })
+    .RequireAuthorization()
     .WithName("GetWeatherForecast");
 
 
