@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MOIT151.Web.Modules;
 using NSwag;
 using NSwag.AspNetCore;
 using NSwag.Generation.Processors;
@@ -23,39 +24,9 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+builder.Services.AddMOIT151OpenApi();
+
 builder.Services.AddAuthorization();
-
-builder.Services.AddOpenApiDocument(options =>
-{
-    options.DocumentName = "CreditZone";
-    options.Title = "CreditZone";
-    options.Description = "CreditZone API";
-    options.Version = "v1";
-    options.OperationProcessors.Add(new OperationSecurityScopeProcessor("Bearer"));
-    options.AddSecurity("Bearer", new OpenApiSecurityScheme
-        {
-            Description = "JWT Token from Auth0",
-            Name = "Authorization",
-            In = OpenApiSecurityApiKeyLocation.Header,
-
-            Type = OpenApiSecuritySchemeType.OAuth2,
-            Flows = new OpenApiOAuthFlows()
-            {
-                Implicit = new OpenApiOAuthFlow
-                {
-                    Scopes = new Dictionary<string, string>
-                    {
-                        { "openid", "Open Id" }
-                    },
-
-                    AuthorizationUrl = "https://ewan.au.auth0.com/authorize?audience=https://ewan/api"
-                }
-            }
-        }
-    );
-});
-
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
