@@ -17,4 +17,8 @@
         <PackageReference Include="NSwag.AspNetCore" Version="14.4.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\MOIT151.Infrastructure\MOIT151.Infrastructure.csproj" />
+    </ItemGroup>
+
 </Project>
