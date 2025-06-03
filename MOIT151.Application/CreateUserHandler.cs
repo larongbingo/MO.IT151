@@ -7,7 +7,7 @@ namespace MOIT151.Application;
 
 public static class CreateUser
 {
-    public class Handler(Validator validator, IUserRepository userRepository, IUnitOfWork unitOfWork) : IRequestHandler<Request, Result<Dto>>
+    public class Handler(IValidator<Request> validator, IUserRepository userRepository, IUnitOfWork unitOfWork) : IRequestHandler<Request, Result<Dto>>
     {
         public async ValueTask<Result<Dto>> Handle(Request request, CancellationToken cancellationToken)
         {
@@ -56,8 +56,8 @@ public static class CreateUser
 
     public static IServiceCollection AddCreateUserUseCase(this IServiceCollection serviceCollection)
     {
-        serviceCollection.AddTransient<IValidator<Request>, Validator>();
-        serviceCollection.AddTransient<IRequestHandler<Request, Result<Dto>>, Handler>();
+        serviceCollection.AddScoped<IValidator<Request>, Validator>();
+        serviceCollection.AddScoped<IRequestHandler<Request, Result<Dto>>, Handler>();
 
         return serviceCollection;
     }

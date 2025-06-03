@@ -1,6 +1,11 @@
 using System.Security.Claims;
+using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using MOIT151.Application;
+using MOIT151.Infrastructure.Data;
+using MOIT151.Web.Authorization;
 using MOIT151.Web.Modules;
 using NSwag;
 using NSwag.AspNetCore;
@@ -24,9 +29,16 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+builder.Services.AddMediator(x => x.ServiceLifetime = ServiceLifetime.Transient);
+
+builder.Services.AddMOIT151Authorization();
+
+builder.Services.AddMOIT151Data();
+
 builder.Services.AddMOIT151OpenApi();
 
-builder.Services.AddAuthorization();
+builder.Services.AddCreateUserUseCase();
+
 
 var app = builder.Build();
 
@@ -36,14 +48,13 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
 app.MapGet("/weatherforecast", () =>
     {
+        var summaries = new[]
+        {
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        };
+
         var forecast = Enumerable.Range(1, 5).Select(index =>
                 new WeatherForecast
                 (
@@ -57,6 +68,23 @@ app.MapGet("/weatherforecast", () =>
     .RequireAuthorization()
     .WithName("GetWeatherForecast");
 
+var api = app.MapGroup("/api");
+api.MapPost("/user", async Task<IResult> (
+        [FromServices] IMediator mediator, [FromServices] IExternalIdentityService identityService,
+        [FromBody] CreateUserRequest request) =>
+    {
+        var command = new CreateUser.Request(
+            identityService.GetExternalUserId(),
+            request.Username);
+        
+        var result = await mediator.Send(command);
+
+        if (result.IsSuccess)
+            return Results.Created("/api/user", result.Value);
+        return Results.BadRequest(result.ErrorMessages);
+    })
+    .RequireAuthorization()
+    .WithName("CreateUser");
 
 app.UseOpenApi();
 
@@ -76,3 +104,5 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+
+public record CreateUserRequest(string Username);
