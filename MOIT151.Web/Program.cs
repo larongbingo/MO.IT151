@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using MOIT151.Application;
 using MOIT151.Infrastructure.Data;
+using MOIT151.Infrastructure.FileStorage;
 using MOIT151.Web.Authorization;
 using MOIT151.Web.Modules;
 using NSwag;
@@ -35,10 +36,11 @@ builder.Services.AddMOIT151Authorization();
 
 builder.Services.AddMOIT151Data();
 
+builder.Services.AddMOIT151S3Storage();
+
 builder.Services.AddMOIT151OpenApi();
 
 builder.Services.AddCreateUserUseCase();
-
 
 var app = builder.Build();
 
@@ -73,9 +75,11 @@ api.MapPost("/user", async Task<IResult> (
         [FromServices] IMediator mediator, [FromServices] IExternalIdentityService identityService,
         [FromBody] CreateUserRequest request) =>
     {
-        var command = new CreateUser.Request(
-            identityService.GetExternalUserId(),
-            request.Username);
+        var externalId = identityService.GetExternalUserId();
+        if (externalId is null)
+            return Results.Unauthorized();
+        
+        var command = new CreateUser.Request(externalId, request.Username);
         
         var result = await mediator.Send(command);
 
@@ -84,7 +88,21 @@ api.MapPost("/user", async Task<IResult> (
         return Results.BadRequest(result.ErrorMessages);
     })
     .RequireAuthorization()
+    .WithTags("User")
     .WithName("CreateUser");
+
+api.MapGet("/user", async Task<IResult> ([FromServices] IExternalIdentityService IExternalIdentityService, 
+        [FromServices]IUserRepository repository) =>
+    {
+        var externalId = IExternalIdentityService.GetExternalUserId();
+        if (externalId is null)
+            return Results.Unauthorized();
+        var user = await repository.GetByExternalIdAsync(externalId);
+        return Results.Ok(user);
+    })
+    .RequireAuthorization()
+    .WithTags("User")
+    .WithName("GetUser");
 
 app.UseOpenApi();
 
