@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using Amazon.S3;
+using Amazon.S3.Model;
 using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +44,8 @@ builder.Services.AddMOIT151OpenApi();
 
 builder.Services.AddCreateUserUseCase();
 
+builder.Services.AddCreateFileUploadUseCases();
+
 var app = builder.Build();
 
 app.MapOpenApi();
@@ -52,10 +56,19 @@ app.UseAuthorization();
 
 app.MapGet("/weatherforecast", () =>
     {
-        var summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        string[] summaries =
+        [
+            "Freezing", 
+            "Bracing", 
+            "Chilly", 
+            "Cool", 
+            "Mild", 
+            "Warm", 
+            "Balmy", 
+            "Hot", 
+            "Sweltering", 
+            "Scorching"
+        ];
 
         var forecast = Enumerable.Range(1, 5).Select(index =>
                 new WeatherForecast
@@ -67,7 +80,6 @@ app.MapGet("/weatherforecast", () =>
             .ToArray();
         return forecast;
     })
-    .RequireAuthorization()
     .WithName("GetWeatherForecast");
 
 var api = app.MapGroup("/api");
@@ -87,22 +99,41 @@ api.MapPost("/user", async Task<IResult> (
             return Results.Created("/api/user", result.Value);
         return Results.BadRequest(result.ErrorMessages);
     })
-    .RequireAuthorization()
+    .RequireAuthorization(nameof(NoopAuthorizationRequirement))
     .WithTags("User")
     .WithName("CreateUser");
 
-api.MapGet("/user", async Task<IResult> ([FromServices] IExternalIdentityService IExternalIdentityService, 
+api.MapGet("/user", async Task<IResult> ([FromServices] IExternalIdentityService identityService, 
         [FromServices]IUserRepository repository) =>
     {
-        var externalId = IExternalIdentityService.GetExternalUserId();
+        var externalId = identityService.GetExternalUserId();
         if (externalId is null)
             return Results.Unauthorized();
         var user = await repository.GetByExternalIdAsync(externalId);
         return Results.Ok(user);
     })
-    .RequireAuthorization()
+    .RequireAuthorization(nameof(NoopAuthorizationRequirement))
     .WithTags("User")
     .WithName("GetUser");
+
+api.MapPost("/file", async Task<IResult> ([FromServices] IExternalIdentityService identityService, 
+    [FromServices] IMediator mediator, CancellationToken ct) =>
+    {
+        var user = await identityService.GetUserAsync(ct);
+        if (user is null)
+            return Results.Unauthorized();
+
+        var command = new CreateFileUpload.Request(user.Id);
+        
+        var result = await mediator.Send(command);
+        
+        if (!result.IsSuccess)
+            return Results.BadRequest(result.ErrorMessages);
+        return Results.Created("/api/file", result.Value);
+    })
+    .RequireAuthorization()
+    .WithTags("File")
+    .WithName("CreateFileUpload");
 
 app.UseOpenApi();
 

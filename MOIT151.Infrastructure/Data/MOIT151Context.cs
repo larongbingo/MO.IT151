@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using MOIT151.Core;
+using File = MOIT151.Core.File;
 
 namespace MOIT151.Infrastructure.Data;
 
 public class MOIT151Context : DbContext
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<File> Files { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

@@ -1,7 +1,9 @@
 namespace MOIT151.Core;
 
-public class File(string name, string uri)
+public class File(Guid id, string uploadUri, Guid userId, string? uri = null)
 {
-    public string Name { get; set; } = name;
-    public string Uri { get; } = uri;
+    public Guid Id { get; private set; } = id;
+    public string UploadUri { get; private set; } = uploadUri;
+    public Guid UserId { get; private set; } = userId;
+    public string? Uri { get; private set; } = uri;
 }
