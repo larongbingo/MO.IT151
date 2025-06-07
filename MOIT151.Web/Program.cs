@@ -46,6 +46,8 @@ builder.Services.AddCreateUserUseCase();
 
 builder.Services.AddCreateFileUploadUseCases();
 
+builder.Services.AddValidateFileUpload();
+
 var app = builder.Build();
 
 app.MapOpenApi();
@@ -110,6 +112,8 @@ api.MapGet("/user", async Task<IResult> ([FromServices] IExternalIdentityService
         if (externalId is null)
             return Results.Unauthorized();
         var user = await repository.GetByExternalIdAsync(externalId);
+        if (user is null)
+            return Results.NotFound();
         return Results.Ok(user);
     })
     .RequireAuthorization(nameof(NoopAuthorizationRequirement))
@@ -134,6 +138,37 @@ api.MapPost("/file", async Task<IResult> ([FromServices] IExternalIdentityServic
     .RequireAuthorization()
     .WithTags("File")
     .WithName("CreateFileUpload");
+
+api.MapPut("/file", async Task<IResult> ([FromQuery] Guid fileId, [FromServices] IExternalIdentityService identityService, [FromServices] IMediator mediator, CancellationToken ct) =>
+    {
+        var user = await identityService.GetUserAsync(ct);
+        if (user is null)
+            return Results.Unauthorized();
+
+        var command = new ValidateFileUpload.Request(user.Id, fileId);
+
+        var result = await mediator.Send(command);
+
+        if (!result.IsSuccess)
+            return Results.BadRequest(result.ErrorMessages);
+        return Results.Ok(result.Value);
+    })
+    .RequireAuthorization()
+    .WithTags("File")
+    .WithName("ValidateUpload");
+
+api.MapGet("/file", async Task<IResult> ([FromServices] IExternalIdentityService identityService, [FromServices] IFileRepository fileRepository, CancellationToken ct) =>
+    {
+        var user = await identityService.GetUserAsync(ct);
+        if (user is null)
+            return Results.Unauthorized();
+
+        var files = await fileRepository.GetListByUserIdAsync(user.Id, ct);
+        return Results.Ok(files);
+    })
+    .RequireAuthorization()
+    .WithTags("File")
+    .WithName("GetFiles");
 
 app.UseOpenApi();
 

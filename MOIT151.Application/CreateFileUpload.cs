@@ -19,7 +19,7 @@ public static class CreateFileUpload
             if (requestUri is null)
                 return Result<Dto>.Failure("Upload URI not found");
 
-            var newFile = new File(Guid.NewGuid(), requestUri, request.UserId);
+            var newFile = new File(newFileId, requestUri, request.UserId);
             
             await fileRepository.AddAsync(newFile, cancellationToken);
             
