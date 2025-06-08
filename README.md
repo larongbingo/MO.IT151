@@ -14,3 +14,10 @@ A prototype on the "Financial Analysis" of their case study
       - <code>dotnet ef database update --project ./MOIT151.Infrastructure</code>
 4. Run the webapi (assuming at root project directory)
    - <code>dotnet run --project ./MOIT151.Web</code>
+
+## Note on running Source command with .env
+<code>
+set -o allexport
+source ./.env
+set +a allexport
+</code>
