@@ -6,7 +6,22 @@ namespace MOIT151.Infrastructure.FileStorage;
 
 public class StorageService(AmazonS3Client s3Client) : IStorageService
 {
-    private readonly string BucketName = Environment.GetEnvironmentVariable("MOIT151_S3_BUCKET_NAME") ?? throw new Exception("Bucket Name should be set"); 
+    private readonly string BucketName = Environment.GetEnvironmentVariable("MOIT151_S3_BUCKET_NAME") ?? throw new Exception("Bucket Name should be set");
+
+    public async Task<string?> GetPresignedDownloadUriAsync(string key, CancellationToken cancellationToken = default)
+    {
+        var presignRequest = new GetPreSignedUrlRequest()
+        {
+            BucketName = BucketName,
+            Key = key,
+            Verb = HttpVerb.GET,
+            Expires = DateTime.Now.AddHours(1),
+        };
+
+        var path = await s3Client.GetPreSignedURLAsync(presignRequest);
+
+        return path;
+    }
 
     public async Task<string?> GetPresignedUploadUriAsync(string key, CancellationToken cancellationToken)
     {

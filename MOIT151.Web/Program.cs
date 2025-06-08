@@ -48,6 +48,8 @@ builder.Services.AddCreateFileUploadUseCases();
 
 builder.Services.AddValidateFileUpload();
 
+builder.Services.AddGetFilePresignedUrl();
+
 var app = builder.Build();
 
 app.MapOpenApi();
@@ -129,7 +131,7 @@ api.MapPost("/file", async Task<IResult> ([FromServices] IExternalIdentityServic
 
         var command = new CreateFileUpload.Request(user.Id);
         
-        var result = await mediator.Send(command);
+        var result = await mediator.Send(command, ct);
         
         if (!result.IsSuccess)
             return Results.BadRequest(result.ErrorMessages);
@@ -147,7 +149,7 @@ api.MapPut("/file", async Task<IResult> ([FromQuery] Guid fileId, [FromServices]
 
         var command = new ValidateFileUpload.Request(user.Id, fileId);
 
-        var result = await mediator.Send(command);
+        var result = await mediator.Send(command, ct);
 
         if (!result.IsSuccess)
             return Results.BadRequest(result.ErrorMessages);
@@ -169,6 +171,24 @@ api.MapGet("/file", async Task<IResult> ([FromServices] IExternalIdentityService
     .RequireAuthorization()
     .WithTags("File")
     .WithName("GetFiles");
+
+api.MapGet("/file/{fileId:guid}", async Task<IResult> ([FromRoute] Guid fileId, [FromServices] IMediator mediator, [FromServices] IExternalIdentityService identityService, CancellationToken ct) =>
+    {
+        var user = await identityService.GetUserAsync(ct);
+        if (user is null)
+            return Results.Unauthorized();
+
+        var command = new GetFilePresignedUrl.Request(user.Id, fileId);
+
+        var result = await mediator.Send(command, ct);
+
+        if (!result.IsSuccess)
+            return Results.NotFound(result.ErrorMessages);
+        return Results.Ok(result.Value);
+    })
+    .RequireAuthorization()
+    .WithTags("File")
+    .WithName("GetFileDownloadLink");
 
 app.UseOpenApi();
 
