@@ -141,7 +141,9 @@ api.MapPost("/file", async Task<IResult> ([FromServices] IExternalIdentityServic
     .WithTags("File")
     .WithName("CreateFileUpload");
 
-api.MapPut("/file", async Task<IResult> ([FromQuery] Guid fileId, [FromServices] IExternalIdentityService identityService, [FromServices] IMediator mediator, CancellationToken ct) =>
+api.MapPut("/file", async Task<IResult> ([FromQuery] Guid fileId, 
+        [FromServices] IExternalIdentityService identityService, [FromServices] IMediator mediator, 
+        CancellationToken ct) =>
     {
         var user = await identityService.GetUserAsync(ct);
         if (user is null)
@@ -159,7 +161,8 @@ api.MapPut("/file", async Task<IResult> ([FromQuery] Guid fileId, [FromServices]
     .WithTags("File")
     .WithName("ValidateUpload");
 
-api.MapGet("/file", async Task<IResult> ([FromServices] IExternalIdentityService identityService, [FromServices] IFileRepository fileRepository, CancellationToken ct) =>
+api.MapGet("/file", async Task<IResult> ([FromServices] IExternalIdentityService identityService, 
+        [FromServices] IFileRepository fileRepository, CancellationToken ct) =>
     {
         var user = await identityService.GetUserAsync(ct);
         if (user is null)
@@ -172,7 +175,8 @@ api.MapGet("/file", async Task<IResult> ([FromServices] IExternalIdentityService
     .WithTags("File")
     .WithName("GetFiles");
 
-api.MapGet("/file/{fileId:guid}", async Task<IResult> ([FromRoute] Guid fileId, [FromServices] IMediator mediator, [FromServices] IExternalIdentityService identityService, CancellationToken ct) =>
+api.MapGet("/file/{fileId:guid}", async Task<IResult> ([FromRoute] Guid fileId, [FromServices] IMediator mediator, 
+        [FromServices] IExternalIdentityService identityService, CancellationToken ct) =>
     {
         var user = await identityService.GetUserAsync(ct);
         if (user is null)
