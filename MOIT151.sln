@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MOIT151.Core", "MOIT151.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MOIT151.Infrastructure", "MOIT151.Infrastructure\MOIT151.Infrastructure.csproj", "{9B67BF90-6FA0-4E43-8DC7-E1816675A73D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MOIT151.Mobile", "MOIT151.Mobile\MOIT151.Mobile.csproj", "{65F45541-3680-4EB3-B83E-87C42A514631}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +68,18 @@ Global
 		{9B67BF90-6FA0-4E43-8DC7-E1816675A73D}.Release|x64.Build.0 = Release|Any CPU
 		{9B67BF90-6FA0-4E43-8DC7-E1816675A73D}.Release|x86.ActiveCfg = Release|Any CPU
 		{9B67BF90-6FA0-4E43-8DC7-E1816675A73D}.Release|x86.Build.0 = Release|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Debug|x64.Build.0 = Debug|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Debug|x86.Build.0 = Debug|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Release|x64.ActiveCfg = Release|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Release|x64.Build.0 = Release|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Release|x86.ActiveCfg = Release|Any CPU
+		{65F45541-3680-4EB3-B83E-87C42A514631}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
