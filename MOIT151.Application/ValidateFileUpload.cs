@@ -18,21 +18,20 @@ public static class ValidateFileUpload
             }
 
             var file = await fileRepository.GetByUserIdAndFileIdAsync(request.UserId, request.FileId, cancellationToken);
-
             if (file is null)
             {
                 return Result<Dto>.Failure("File doesn't exist");
+            }
+            
+            if (file.IsExists)
+            {
+                return Result<Dto>.Failure("File is already validated to be uploaded");
             }
             
             var isFileExists = await storageService.ObjectExistsByKeyAsync(file.Key, cancellationToken);
             if (!isFileExists)
             {
                 return Result<Dto>.Failure("S3 doesn't have the file, possibly there's no file uploaded`");
-            }
-
-            if (file.IsExists)
-            {
-                return Result<Dto>.Failure("File is already validated to be uploaded");
             }
 
             file.IsExists = true;
