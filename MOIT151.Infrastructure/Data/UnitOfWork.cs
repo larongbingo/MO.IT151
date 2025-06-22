@@ -4,8 +4,8 @@ namespace MOIT151.Infrastructure.Data;
 
 public class UnitOfWork (MOIT151Context dbContext): IUnitOfWork
 {
-    public async Task SaveChangesAsync(CancellationToken ct = default)
+    public async Task<int> SaveChangesAsync(CancellationToken ct = default)
     {
-        await dbContext.SaveChangesAsync(ct);
+        return await dbContext.SaveChangesAsync(ct);
     }
 }
