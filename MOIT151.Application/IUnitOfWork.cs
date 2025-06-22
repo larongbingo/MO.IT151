@@ -2,5 +2,5 @@ namespace MOIT151.Application;
 
 public interface IUnitOfWork
 {
-    Task SaveChangesAsync(CancellationToken ct = default);
+    Task<int> SaveChangesAsync(CancellationToken ct = default);
 }

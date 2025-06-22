@@ -20,10 +20,19 @@ public class FileRepository(MOIT151Context dbContext) : IFileRepository
     {
         return await dbContext.Files.Where(x => x.UserId == userId).ToListAsync(ct);
     }
-
+    
     public Task UpdateAsync(File file, CancellationToken ct = default)
     {
         dbContext.Files.Update(file);
         return Task.CompletedTask;
     }
+    
+    public Task DeleteInvalidFilesAsync(CancellationToken ct = default)
+    {
+        var invalidFiles = 
+            dbContext.Files.Where(x => !x.IsExists && DateTime.UtcNow - x.CreatedAt > TimeSpan.FromHours(1));
+        dbContext.Files.RemoveRange(invalidFiles);
+        return Task.CompletedTask;
+    }
+
 }

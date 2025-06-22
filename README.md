@@ -43,3 +43,11 @@ set -o allexport
 source ./.env
 set +a allexport
 </code>
+
+## Command for running source equivalent in windows
+<code>
+Get-Content .\.env | ForEach-Object { 
+    $key, $value = $_ -split '=(.+)', 2
+    [Environment]::SetEnvironmentVariable($key, ($value -replace '"'), [EnvironmentVariableTarget]::Process)
+}
+</code>

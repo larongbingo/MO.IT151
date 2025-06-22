@@ -50,6 +50,8 @@ builder.Services.AddValidateFileUpload();
 
 builder.Services.AddGetFilePresignedUrl();
 
+builder.Services.AddHostedService<FileCleanupBackgroundService>();
+
 var app = builder.Build();
 
 app.MapOpenApi();
