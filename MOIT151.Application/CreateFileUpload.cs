@@ -12,20 +12,19 @@ public static class CreateFileUpload
     {
         public async ValueTask<Result<Dto>> Handle(Request request, CancellationToken cancellationToken)
         {
-            var newFileId = Guid.NewGuid();
-            
-            var key = $"{request.UserId}/{newFileId}";
+            var fileId = Guid.NewGuid();
+            var key = File.GenerateKey(request.UserId, fileId);
             var requestUri = await storageService.GetPresignedUploadUriAsync(key, cancellationToken);
             if (requestUri is null)
                 return Result<Dto>.Failure("Upload URI not found");
 
-            var newFile = new File(newFileId, requestUri, request.UserId);
+            var newFile = new File(fileId, requestUri, request.UserId);
             
             await fileRepository.AddAsync(newFile, cancellationToken);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
             
-            return Result<Dto>.Success(new Dto(requestUri, newFileId));
+            return Result<Dto>.Success(new Dto(requestUri, newFile.Id));
         }
     }
     
