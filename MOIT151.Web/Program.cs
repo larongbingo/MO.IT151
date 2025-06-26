@@ -204,7 +204,7 @@ app.MapScalarApiReference("/swagger", (options, httpContext) =>
         .AddImplicitFlow("Bearer", flow =>
         {
             flow.ClientId = "h5m8clc3ztoWe0brx1qHZR9FDQ7GIltL";
-            flow.RedirectUri = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}/swagger/oauth2-redirect.html";
+            flow.RedirectUri = $"https://{httpContext.Request.Host}/swagger/oauth2-redirect.html";
         });
 });
 
