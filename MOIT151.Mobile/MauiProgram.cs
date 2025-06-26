@@ -15,6 +15,17 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
+		builder.Services.AddSingleton<MainPage>();
+
+		builder.Services.AddSingleton(new Auth0Client(new Auth0ClientOptions()
+		{
+			Domain = "ewan.au.auth0.com",
+			ClientId = "h5m8clc3ztoWe0brx1qHZR9FDQ7GIltL",
+			RedirectUri = "moit151://callback",
+			PostLogoutRedirectUri = "moit151://callback",
+			Scope = "openid",
+		}));
+		
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif

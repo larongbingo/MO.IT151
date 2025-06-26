@@ -1,24 +1,37 @@
-﻿namespace MOIT151.Mobile;
+﻿using Auth0.OidcClient;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
+using Newtonsoft.Json;
+
+namespace MOIT151.Mobile;
 
 public partial class MainPage : ContentPage
 {
-	int count = 0;
-
-	public MainPage()
+	private readonly Auth0Client _auth0Client;
+	
+	public MainPage(Auth0Client auth0Client)
 	{
+		_auth0Client = auth0Client;
 		InitializeComponent();
 	}
 
-	private void OnCounterClicked(object sender, EventArgs e)
+	private async void OnCounterClicked(object sender, EventArgs e)
 	{
-		count++;
+		var loginResult = await _auth0Client.LoginAsync();
+		
+		Console.WriteLine(JsonConvert.SerializeObject(loginResult));
+	}
 
-		if (count == 1)
-			CounterBtn.Text = $"Clicked {count} time";
-		else
-			CounterBtn.Text = $"Clicked {count} times";
+	private async void OnSelectFileClicked(object? sender, EventArgs e)
+	{
+		var result = await FilePicker.PickAsync();
 
-		SemanticScreenReader.Announce(CounterBtn.Text);
+		if (result is null)
+		{
+			Toast.Make("No file selected", ToastDuration.Long);
+			return;
+		}
+		
 	}
 }
 
