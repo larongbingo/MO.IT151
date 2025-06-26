@@ -10,9 +10,9 @@ public static class OpenApiModule
     {
         services.AddOpenApiDocument(options =>
         {
-            options.DocumentName = "CreditZone";
-            options.Title = "CreditZone";
-            options.Description = "CreditZone API";
+            options.DocumentName = "FinMarkPrototype";
+            options.Title = "FinMarkPrototype";
+            options.Description = "This is a prototype API for FinMark. FinMark is a capstone project for MOIT151.";
             options.Version = "v1";
             options.OperationProcessors.Add(new OperationSecurityScopeProcessor("Bearer"));
             options.AddSecurity("Bearer", new NSwag.OpenApiSecurityScheme
