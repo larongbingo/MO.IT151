@@ -5,15 +5,13 @@ using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Writers;
 using MOIT151.Application;
 using MOIT151.Infrastructure.Data;
 using MOIT151.Infrastructure.FileStorage;
 using MOIT151.Web.Authorization;
 using MOIT151.Web.Modules;
-using NSwag;
-using NSwag.AspNetCore;
-using NSwag.Generation.Processors;
-using NSwag.Generation.Processors.Security;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,8 +52,6 @@ builder.Services.AddHostedService<FileCleanupBackgroundService>();
 
 var app = builder.Build();
 
-app.MapOpenApi();
-
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -86,7 +82,8 @@ app.MapGet("/weatherforecast", () =>
             .ToArray();
         return forecast;
     })
-    .WithName("GetWeatherForecast");
+    .AllowAnonymous()
+    .WithDisplayName("GetWeatherForecast");
 
 var api = app.MapGroup("/api");
 api.MapPost("/user", async Task<IResult> (
@@ -107,7 +104,7 @@ api.MapPost("/user", async Task<IResult> (
     })
     .RequireAuthorization(nameof(NoopAuthorizationRequirement))
     .WithTags("User")
-    .WithName("CreateUser");
+    .WithDisplayName("CreateUser");
 
 api.MapGet("/user", async Task<IResult> ([FromServices] IExternalIdentityService identityService, 
         [FromServices]IUserRepository repository) =>
@@ -122,7 +119,7 @@ api.MapGet("/user", async Task<IResult> ([FromServices] IExternalIdentityService
     })
     .RequireAuthorization(nameof(NoopAuthorizationRequirement))
     .WithTags("User")
-    .WithName("GetUser");
+    .WithDisplayName("GetUser");
 
 api.MapPost("/file", async Task<IResult> ([FromServices] IExternalIdentityService identityService, 
     [FromServices] IMediator mediator, CancellationToken ct) =>
@@ -141,7 +138,7 @@ api.MapPost("/file", async Task<IResult> ([FromServices] IExternalIdentityServic
     })
     .RequireAuthorization()
     .WithTags("File")
-    .WithName("CreateFileUpload");
+    .WithDisplayName("CreateFileUpload");
 
 api.MapPut("/file", async Task<IResult> ([FromQuery] Guid fileId, 
         [FromServices] IExternalIdentityService identityService, [FromServices] IMediator mediator, 
@@ -161,7 +158,7 @@ api.MapPut("/file", async Task<IResult> ([FromQuery] Guid fileId,
     })
     .RequireAuthorization()
     .WithTags("File")
-    .WithName("ValidateUpload");
+    .WithDisplayName("ValidateUpload");
 
 api.MapGet("/file", async Task<IResult> ([FromServices] IExternalIdentityService identityService, 
         [FromServices] IFileRepository fileRepository, CancellationToken ct) =>
@@ -175,9 +172,9 @@ api.MapGet("/file", async Task<IResult> ([FromServices] IExternalIdentityService
     })
     .RequireAuthorization()
     .WithTags("File")
-    .WithName("GetFiles");
+    .WithDisplayName("GetFiles");
 
-api.MapGet("/file/{fileId:guid}", async Task<IResult> ([FromRoute] Guid fileId, [FromServices] IMediator mediator, 
+api.MapGet("/file/{fileId:guid}", async Task<IResult> ([FromRoute] Guid fileId, [FromServices] IMediator mediator,
         [FromServices] IExternalIdentityService identityService, CancellationToken ct) =>
     {
         var user = await identityService.GetUserAsync(ct);
@@ -193,20 +190,23 @@ api.MapGet("/file/{fileId:guid}", async Task<IResult> ([FromRoute] Guid fileId, 
         return Results.Ok(result.Value);
     })
     .RequireAuthorization()
+    
     .WithTags("File")
-    .WithName("GetFileDownloadLink");
+    .WithDisplayName("GetFileDownloadLink")
+    .WithDescription("Creates a Download Presigned URL for a File")
+    .WithOpenApi();
 
-app.UseOpenApi();
+app.MapOpenApi();
 
-app.UseSwaggerUi(options =>
+app.MapScalarApiReference("/swagger", (options, httpContext) =>
 {
-    options.OAuth2Client = new OAuth2ClientSettings
-    {
-        ClientId = "h5m8clc3ztoWe0brx1qHZR9FDQ7GIltL",
-        AppName = "MOIT151",
-    };
+    options.AddPreferredSecuritySchemes("Bearer")
+        .AddImplicitFlow("Bearer", flow =>
+        {
+            flow.ClientId = "h5m8clc3ztoWe0brx1qHZR9FDQ7GIltL";
+            flow.RedirectUri = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}/swagger/oauth2-redirect.html";
+        });
 });
-
 
 app.Run();
 
