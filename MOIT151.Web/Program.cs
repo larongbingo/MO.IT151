@@ -104,7 +104,8 @@ api.MapPost("/user", async Task<IResult> (
     })
     .RequireAuthorization(nameof(NoopAuthorizationRequirement))
     .WithTags("User")
-    .WithDisplayName("CreateUser");
+    .WithDisplayName("CreateUser")
+    .WithDescription("Creates a User Profile");
 
 api.MapGet("/user", async Task<IResult> ([FromServices] IExternalIdentityService identityService, 
         [FromServices]IUserRepository repository) =>
@@ -119,7 +120,8 @@ api.MapGet("/user", async Task<IResult> ([FromServices] IExternalIdentityService
     })
     .RequireAuthorization(nameof(NoopAuthorizationRequirement))
     .WithTags("User")
-    .WithDisplayName("GetUser");
+    .WithDisplayName("GetUser")
+    .WithDescription("Gets the User's details");
 
 api.MapPost("/file", async Task<IResult> ([FromServices] IExternalIdentityService identityService, 
     [FromServices] IMediator mediator, CancellationToken ct) =>
@@ -138,9 +140,10 @@ api.MapPost("/file", async Task<IResult> ([FromServices] IExternalIdentityServic
     })
     .RequireAuthorization()
     .WithTags("File")
-    .WithDisplayName("CreateFileUpload");
+    .WithDisplayName("CreateFileUpload")
+    .WithDescription("Creates a Presigned Upload URL for a File");
 
-api.MapPut("/file", async Task<IResult> ([FromQuery] Guid fileId, 
+api.MapPut("/file/{fileId:guid}", async Task<IResult> ([FromRoute] Guid fileId, 
         [FromServices] IExternalIdentityService identityService, [FromServices] IMediator mediator, 
         CancellationToken ct) =>
     {
@@ -158,7 +161,8 @@ api.MapPut("/file", async Task<IResult> ([FromQuery] Guid fileId,
     })
     .RequireAuthorization()
     .WithTags("File")
-    .WithDisplayName("ValidateUpload");
+    .WithDisplayName("ValidateUpload")
+    .WithDescription("Validates a File Upload");
 
 api.MapGet("/file", async Task<IResult> ([FromServices] IExternalIdentityService identityService, 
         [FromServices] IFileRepository fileRepository, CancellationToken ct) =>
@@ -172,7 +176,8 @@ api.MapGet("/file", async Task<IResult> ([FromServices] IExternalIdentityService
     })
     .RequireAuthorization()
     .WithTags("File")
-    .WithDisplayName("GetFiles");
+    .WithDisplayName("GetFiles")
+    .WithDescription("Gets all Files for a User");
 
 api.MapGet("/file/{fileId:guid}", async Task<IResult> ([FromRoute] Guid fileId, [FromServices] IMediator mediator,
         [FromServices] IExternalIdentityService identityService, CancellationToken ct) =>
@@ -190,11 +195,9 @@ api.MapGet("/file/{fileId:guid}", async Task<IResult> ([FromRoute] Guid fileId, 
         return Results.Ok(result.Value);
     })
     .RequireAuthorization()
-    
     .WithTags("File")
     .WithDisplayName("GetFileDownloadLink")
-    .WithDescription("Creates a Download Presigned URL for a File")
-    .WithOpenApi();
+    .WithDescription("Creates a Download Presigned URL for a File");
 
 app.MapOpenApi();
 
