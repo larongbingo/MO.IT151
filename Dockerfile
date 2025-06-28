@@ -22,4 +22,11 @@ RUN dotnet publish "./MOIT151.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+# Enable the agent
+ENV CORECLR_ENABLE_PROFILING=1 \
+CORECLR_PROFILER={36032161-FFC0-4B61-B559-F6C5D41BAE5A} \
+CORECLR_NEWRELIC_HOME=/app/bin/Debug/net9.0/newrelic \
+CORECLR_PROFILER_PATH=/app/bin/Debug/net9.0/newrelic/libNewRelicProfiler.so \
+NEW_RELIC_LICENSE_KEY=497f148248973427b869414a8b49043dFFFFNRAL \
+NEW_RELIC_APP_NAME="MOIT151-WebAPI"
 ENTRYPOINT ["dotnet", "MOIT151.Web.dll"]
