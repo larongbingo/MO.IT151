@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using MOIT151.Application;
+using NewRelic.Api.Agent;
 
 namespace MOIT151.Infrastructure.FileStorage;
 
@@ -8,6 +9,7 @@ public class StorageService(AmazonS3Client s3Client) : IStorageService
 {
     private readonly string BucketName = Environment.GetEnvironmentVariable("MOIT151_S3_BUCKET_NAME") ?? throw new Exception("Bucket Name should be set");
 
+    [Trace]
     public async Task<string?> GetPresignedDownloadUriAsync(string key, CancellationToken cancellationToken = default)
     {
         var presignRequest = new GetPreSignedUrlRequest()
@@ -23,6 +25,7 @@ public class StorageService(AmazonS3Client s3Client) : IStorageService
         return path;
     }
 
+    [Trace]
     public async Task<string?> GetPresignedUploadUriAsync(string key, CancellationToken cancellationToken)
     {
         var presignRequest = new GetPreSignedUrlRequest()
@@ -38,6 +41,7 @@ public class StorageService(AmazonS3Client s3Client) : IStorageService
         return path;
     }
 
+    [Trace]
     public async Task<bool> ObjectExistsByKeyAsync(string key, CancellationToken cancellationToken = default)
     {
         try
