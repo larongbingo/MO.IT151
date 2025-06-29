@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MOIT151.Application;
 using MOIT151.Infrastructure.Data;
+using NewRelic.Api.Agent;
 
 namespace MOIT151.Web.Modules;
 
@@ -8,6 +9,7 @@ public class FileCleanupBackgroundService(IServiceScopeFactory serviceScopeFacto
 {
     private readonly PeriodicTimer timer = new(TimeSpan.FromMinutes(1));
     
+    [Transaction]
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (await timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
