@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MOIT151.Mobile.Pages.Files;
+﻿namespace MOIT151.Mobile.Pages.Files;
 
 public partial class FilesView : ContentPage
 {
-    public FilesView()
+    public FilesView(FilesViewModel viewModel)
     {
+        BindingContext = viewModel;
         InitializeComponent();
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace MOIT151.Mobile;
+﻿using NewRelic.MAUI.Plugin;
+
+namespace MOIT151.Mobile;
 
 public partial class App
 {

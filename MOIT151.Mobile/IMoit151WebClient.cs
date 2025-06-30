@@ -8,7 +8,8 @@ namespace MOIT151.Mobile;
 public interface IMoit151WebClient
 {
     [Post("/api/user")]
-    public Task<IApiResponse> CreateAccountAsync([Authorize] string accessToken, [Body] CreateAccountDto dto, CancellationToken cancellationToken = default);
+    public Task<HttpResponseMessage> CreateAccountAsync([Authorize] string accessToken, [Body] CreateAccountDto dto, 
+        CancellationToken cancellationToken = default);
     public record CreateAccountDto(string Username);
     
     [Get("/api/user")]
@@ -21,4 +22,13 @@ public interface IMoit151WebClient
     [Get("/api/file")]
     public Task<List<File>> GetFilesAsync([Authorize] string accessToken,
         CancellationToken cancellationToken = default);
+    
+    [Put("/api/file/{fileId}")]
+    public Task<IApiResponse> ValidateFileUploadAsync([Authorize] string accessToken,
+        Guid fileId, CancellationToken cancellationToken = default);
+
+    [Get("/api/file/{fileId}")]
+    public Task<GetFilePresignedUrl.Dto> GetDownloadUrlAsync([Authorize] string accessToken, Guid fileId, 
+        CancellationToken cancellationToken = default);
+
 }
