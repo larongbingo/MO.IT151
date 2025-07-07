@@ -45,6 +45,7 @@ dependencies {
     implementation("com.h2database:h2:2.3.232")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.2.0")
     implementation("io.ktor:ktor-server-content-negotiation:3.2.0")
+    implementation("org.jetbrains.exposed:exposed-migration:0.61.0")
     implementation("io.ktor:ktor-server-core:3.2.0")
     implementation("io.ktor:ktor-server-host-common:3.2.0")
     implementation("io.ktor:ktor-server-status-pages:3.2.0")

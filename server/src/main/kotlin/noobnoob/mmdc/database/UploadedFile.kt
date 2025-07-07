@@ -38,7 +38,7 @@ class UploadedFilesDao(id: EntityID<UUID>) : UUIDEntity(id) {
 
 fun daoToModel(dao: UploadedFilesDao) = UploadedFile(
     id = dao.id.value.toKotlinUuid(),
-    userId = dao.userId.toKotlinUuid(),
+    userId = dao.userId.value.toKotlinUuid(),
     uploadUri = dao.uploadUri,
     createdAt = dao.createdAt.toInstant(ZoneOffset.UTC).toKotlinInstant(),
     validatedAt = dao.validatedAt?.toInstant(ZoneOffset.UTC)?.toKotlinInstant()
@@ -47,7 +47,7 @@ fun daoToModel(dao: UploadedFilesDao) = UploadedFile(
 fun ResultRow.toUploadedFile(): UploadedFile {
     return UploadedFile(
         id = this[UploadedFiles.id].value.toKotlinUuid(),
-        userId = this[UploadedFiles.userId].toKotlinUuid(),
+        userId = this[UploadedFiles.userId].value.toKotlinUuid(),
         uploadUri = this[UploadedFiles.uploadUri],
         validatedAt = this[UploadedFiles.validatedAt]?.toInstant(ZoneOffset.UTC)?.toKotlinInstant(),
         createdAt = this[UploadedFiles.createdAt].toInstant(ZoneOffset.UTC).toKotlinInstant()
