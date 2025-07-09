@@ -9,7 +9,7 @@
         <Grid RowDefinitions="2*,*">
             <Label 
                 Grid.Row="0"
-                Text="MotorPH"
+                Text="FinMark"
                 VerticalOptions="Center"
                 HorizontalOptions="Center"
                 FontSize="50"/>
