@@ -7,7 +7,7 @@ namespace MOIT151.Web.Modules;
 
 public class FileCleanupBackgroundService(IServiceScopeFactory serviceScopeFactory) : BackgroundService
 {
-    private readonly PeriodicTimer timer = new(TimeSpan.FromMinutes(1));
+    private readonly PeriodicTimer timer = new(TimeSpan.FromHours(1));
     
     [Transaction]
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
