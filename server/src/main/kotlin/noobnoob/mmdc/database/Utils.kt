@@ -15,8 +15,3 @@ fun UUID.toKotlinUuid(): Uuid {
     buffer.putLong(this.leastSignificantBits)
     return Uuid.fromByteArray(buffer.array())
 }
-
-@OptIn(ExperimentalUuidApi::class)
-fun Uuid.toJavaUuid(): UUID {
-    return this.toLongs { msb, lsb -> UUID(msb, lsb) }
-}

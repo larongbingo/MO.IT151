@@ -20,6 +20,7 @@ import kotlin.time.toJavaInstant
 import kotlin.time.toKotlinInstant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 
 object UploadedFiles : UUIDTable("uploadedFiles") {
     val userId = reference("userId", Users.id)
@@ -27,22 +28,6 @@ object UploadedFiles : UUIDTable("uploadedFiles") {
     val createdAt = datetime("createdAt")
     val validatedAt = datetime("validatedAt").nullable()
 }
-
-class UploadedFilesDao(id: EntityID<UUID>) : UUIDEntity(id) {
-    companion object : UUIDEntityClass<UploadedFilesDao>(UploadedFiles)
-    val userId by UploadedFiles.userId
-    val uploadUri by UploadedFiles.uploadUri
-    val createdAt by UploadedFiles.createdAt
-    val validatedAt by UploadedFiles.validatedAt
-}
-
-fun daoToModel(dao: UploadedFilesDao) = UploadedFile(
-    id = dao.id.value.toKotlinUuid(),
-    userId = dao.userId.value.toKotlinUuid(),
-    uploadUri = dao.uploadUri,
-    createdAt = dao.createdAt.toInstant(ZoneOffset.UTC).toKotlinInstant(),
-    validatedAt = dao.validatedAt?.toInstant(ZoneOffset.UTC)?.toKotlinInstant()
-)
 
 fun ResultRow.toUploadedFile(): UploadedFile {
     return UploadedFile(
@@ -54,33 +39,9 @@ fun ResultRow.toUploadedFile(): UploadedFile {
     )
 }
 
-class UploadedFileRepositoryDaoImpl() : UploadedFilesRepository {
-    override suspend fun getAllFilesByUserId(userId: Uuid): List<UploadedFile> {
-        val files = newSuspendedTransaction(Dispatchers.IO) {
-            UploadedFilesDao
-                .find { UploadedFiles.userId eq userId.toJavaUuid() }
-                .map(::daoToModel)
-        }
-        return files
-    }
-
-    override suspend fun getByUserIdAndFileId(userId: Uuid, fileId: Uuid): UploadedFile? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun addFile(file: UploadedFile) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateFile(file: UploadedFile) {
-        TODO("Not yet implemented")
-    }
-
-}
-
 class UploadedFileRepositoryDslImpl(val uploadedFilesTable: UploadedFiles) : UploadedFilesRepository {
     override suspend fun getAllFilesByUserId(userId: Uuid): List<UploadedFile> {
-        val javaUserId = UUID.fromString(userId.toString())
+        val javaUserId = userId.toJavaUuid()
         val uploadedFiles = newSuspendedTransaction(Dispatchers.IO) {
             uploadedFilesTable
                 .selectAll()
@@ -91,8 +52,8 @@ class UploadedFileRepositoryDslImpl(val uploadedFilesTable: UploadedFiles) : Upl
     }
 
     override suspend fun getByUserIdAndFileId(userId: Uuid, fileId: Uuid): UploadedFile? {
-        val javaUserId = UUID.fromString(userId.toString())
-        val javaFileId = UUID.fromString(fileId.toString())
+        val javaUserId = userId.toJavaUuid()
+        val javaFileId = fileId.toJavaUuid()
         val uploadedFile = newSuspendedTransaction(Dispatchers.IO) {
             uploadedFilesTable
                 .selectAll()
@@ -104,7 +65,7 @@ class UploadedFileRepositoryDslImpl(val uploadedFilesTable: UploadedFiles) : Upl
     }
 
     override suspend fun updateFile(file: UploadedFile) {
-        val javaFileId = UUID.fromString(file.id.toString())
+        val javaFileId = file.id.toJavaUuid()
         newSuspendedTransaction(Dispatchers.IO) {
             uploadedFilesTable.update({ UploadedFiles.id eq javaFileId }, limit = 1) {
                 it[validatedAt] =
@@ -119,8 +80,8 @@ class UploadedFileRepositoryDslImpl(val uploadedFilesTable: UploadedFiles) : Upl
     override suspend fun addFile(file: UploadedFile) {
         newSuspendedTransaction(Dispatchers.IO) {
             uploadedFilesTable.insert {
-                it[id] = UUID.fromString(file.id.toString())
-                it[userId] = UUID.fromString(file.userId.toString())
+                it[id] = file.id.toJavaUuid()
+                it[userId] = file.userId.toJavaUuid()
                 it[uploadUri] = file.uploadUri
                 it[validatedAt] =
                     if (file.validatedAt != null)

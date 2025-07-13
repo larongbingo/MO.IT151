@@ -2,7 +2,9 @@
 
 package noobnoob.mmdc.database
 
+import io.ktor.util.logging.Logger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import noobnoob.mmdc.User
 import noobnoob.mmdc.UsersRepository
 import org.jetbrains.exposed.dao.UUIDEntity
@@ -19,6 +21,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 
 object Users : UUIDTable("users") {
     val username = text("username").uniqueIndex()
@@ -34,39 +37,9 @@ fun ResultRow.toUser(): User {
     )
 }
 
-fun daoToModel(dao: UsersDao) = User(
-    id = dao.id.value.toKotlinUuid(),
-    username = dao.username,
-    externalId = dao.externalId
-)
-
-class UsersDao(id: EntityID<UUID>) : UUIDEntity(id) {
-    companion object : UUIDEntityClass<UsersDao>(Users)
-    var username by Users.username
-    var externalId by Users.externalId
-}
-
-class UsersRepositoryDaoImpl() : UsersRepository {
-    override suspend fun addUser(user: User): Unit = newSuspendedTransaction(Dispatchers.IO) {
-        UsersDao.new {
-            username = user.username
-            externalId = user.externalId
-        }
-    }
-
-    override suspend fun getByExternalId(externalId: String): User? = newSuspendedTransaction(Dispatchers.IO) {
-        UsersDao.find { Users.externalId eq externalId }.map(::daoToModel).singleOrNull()
-    }
-
-    override suspend fun getByUsername(username: String): User? = newSuspendedTransaction(Dispatchers.IO) {
-        UsersDao.find { Users.username eq username }.map(::daoToModel).singleOrNull()
-    }
-
-}
-
 class UsersRepositoryDslImpl(val usersTable: Users) : UsersRepository {
     override suspend fun getByExternalId(externalId: String): User? {
-        val userWithSameExternalId = transaction {
+        val userWithSameExternalId = newSuspendedTransaction(Dispatchers.IO) {
             usersTable
                 .selectAll()
                 .where { Users.externalId eq externalId }
@@ -77,7 +50,7 @@ class UsersRepositoryDslImpl(val usersTable: Users) : UsersRepository {
     }
 
     override suspend fun getByUsername(username: String): User? {
-        val userWithSameUsername = transaction {
+        val userWithSameUsername = newSuspendedTransaction(Dispatchers.IO) {
             usersTable
                 .selectAll()
                 .where {Users.username eq username}
@@ -88,9 +61,9 @@ class UsersRepositoryDslImpl(val usersTable: Users) : UsersRepository {
     }
 
     override suspend fun addUser(user: User) {
-        transaction {
-            usersTable.insert {
-                it[id] = UUID.fromString(user.id.toString())
+        newSuspendedTransaction(Dispatchers.IO) {
+            val result = usersTable.insert {
+                it[id] = user.id.toJavaUuid()
                 it[username] = user.username
                 it[externalId] = user.externalId
             }
