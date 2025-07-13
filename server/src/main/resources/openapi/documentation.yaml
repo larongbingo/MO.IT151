@@ -1,0 +1,67 @@
+openapi: "3.1.0"
+info:
+  title: "Moit151 API"
+  description: "Moit151 API"
+  version: "1.0.0"
+servers:
+  - url: "https://127.0.0.1:8080"
+paths:
+  /:
+    get:
+      description: ""
+      security:
+        - Bearer:
+            - openapi
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+  /api/user:
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewUserRequestBody"
+        required: true
+      security:
+        - Bearer:
+            - openapi
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "User added"
+components:
+  schemas:
+    NewUserRequestBody:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        externalId:
+          type: "string"
+      required:
+        - "username"
+        - "externalId"
+  securitySchemes:
+    Bearer:
+      type: oauth2
+      description: JWT Token from Auth0
+      flows:
+        implicit:
+          authorizationUrl: https://ewan.au.auth0.com/authorize?audience=https://ewan/api
+          scopes:
+            openid: Open Id
