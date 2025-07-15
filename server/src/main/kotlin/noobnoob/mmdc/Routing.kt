@@ -26,14 +26,29 @@ fun Application.configureRouting() {
         }
         authenticate("auth0") {
             post("/api/user") {
+                val userRepository: UsersRepository = UsersRepositoryDslImpl(Users)
+
                 val principal = call.principal<UserIdPrincipal>()
                 if (principal == null) {
                     call.respond(status = HttpStatusCode.BadRequest, message = ResponseTest("Invalid JWT"))
                     return@post
                 }
                 val externalId = principal.name
-                val userRepository: UsersRepository = UsersRepositoryDslImpl(Users)
+
+                val userWithMatchingExternalId = userRepository.getByExternalId(principal.name)
+                if (userWithMatchingExternalId != null) {
+                    call.respond(status = HttpStatusCode.BadRequest, message = ResponseTest("External Id already taken"))
+                    return@post
+                }
+
+
                 val newUserRequestBody = call.receive<NewUserRequestBody>()
+                val userWithMatchingUsername = userRepository.getByUsername(newUserRequestBody.username)
+                if (userWithMatchingUsername != null) {
+                    call.respond(status = HttpStatusCode.BadRequest, message = ResponseTest("Username already taken"))
+                    return@post
+                }
+
                 userRepository.addUser(User(newUserRequestBody.username, externalId))
                 call.respondText("User added")
             }
