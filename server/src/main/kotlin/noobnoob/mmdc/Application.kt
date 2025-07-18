@@ -14,9 +14,7 @@ fun main() {
 }
 
 fun Application.module() {
-    install(ContentNegotiation) {
-        gson()
-    }
+    configureContentNegotiation()
     routing {
         swaggerUI(path = "swagger")
     }
