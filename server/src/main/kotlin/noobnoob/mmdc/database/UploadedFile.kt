@@ -45,7 +45,7 @@ class UploadedFileRepositoryDslImpl(val uploadedFilesTable: UploadedFiles) : Upl
         val uploadedFiles = newSuspendedTransaction(Dispatchers.IO) {
             uploadedFilesTable
                 .selectAll()
-                .where { UploadedFiles.id eq javaUserId }
+                .where { UploadedFiles.userId eq javaUserId }
                 .map { it.toUploadedFile() }
         }
         return uploadedFiles
