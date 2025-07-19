@@ -12,6 +12,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.routing
 import noobnoob.mmdc.database.UploadedFileRepositoryDslImpl
 import noobnoob.mmdc.database.UploadedFiles
@@ -79,7 +80,7 @@ fun Application.configureRouting() {
                 // forced null access since it shouldn't proceed if the user isn't registered
                 val userId = call.principal<UserIdPrincipal>()!!.name
                 val files = filesRepository.getAllFilesByUserId(Uuid.parse(userId))
-                call.respond(files)
+                call.respond(HttpStatusCode.OK, files)
             }
             post("/api/files") {
                 val filesRepository = UploadedFileRepositoryDslImpl(UploadedFiles)
@@ -87,9 +88,55 @@ fun Application.configureRouting() {
                 // forced null access since it shouldn't proceed if the user isn't registered
                 val userId = call.principal<UserIdPrincipal>()!!.name
                 val fileId = Uuid.random()
-                val url = storageService.getPresignedUrl("$userId/$fileId")
+                val url = storageService.getUploadPresignedUrl("$userId/$fileId")
                 filesRepository.addFile(UploadedFile(fileId, Uuid.parse(userId), url.toString()))
-                call.respond(PresignedUrlResponse(url!!, fileId.toString()))
+                call.respond(HttpStatusCode.Created, UploadPresignedUrlResponse(url!!, fileId.toString()))
+            }
+            put("/api/files/{fileId}") {
+                val fileRepository = UploadedFileRepositoryDslImpl(UploadedFiles)
+                val storageService = Storage()
+                val userId = Uuid.parse(call.principal<UserIdPrincipal>()!!.name)
+                if (call.pathParameters["fileId"].isNullOrEmpty()) {
+                    call.respond(HttpStatusCode.BadRequest, Response("FileId is empty"))
+                    return@put
+                }
+                val fileId = Uuid.parse(call.pathParameters["fileId"]!!)
+                val file = fileRepository.getByUserIdAndFileId(userId, fileId)
+                if (file == null || file.validatedAt != null) {
+                    call.respond(Response("Invalid FileId"))
+                    return@put
+                }
+                val key = "$userId/$fileId"
+                val isObjectInStorage = storageService.objectExistsByKey(key)
+                if (isObjectInStorage) {
+                    file.validate()
+                    fileRepository.updateFile(file)
+                    call.respond(HttpStatusCode.Found)
+                    return@put
+                }
+                call.respond(HttpStatusCode.NotFound)
+            }
+            get("/api/files/{fileId}") {
+                val fileRepository = UploadedFileRepositoryDslImpl(UploadedFiles)
+                val storageService = Storage()
+                val userId = Uuid.parse(call.principal<UserIdPrincipal>()!!.name)
+                if (call.pathParameters["fileId"].isNullOrEmpty()) {
+                    call.respond(HttpStatusCode.BadRequest, Response("FileId is empty"))
+                    return@get
+                }
+                val fileId = Uuid.parse(call.pathParameters["fileId"]!!)
+                val file = fileRepository.getByUserIdAndFileId(userId, fileId)
+                if (file == null || file.validatedAt == null) {
+                    call.respond(Response("Invalid FileId"))
+                    return@get
+                }
+                val key = "$userId/$fileId"
+                val downloadUrl = storageService.getDownloadPresignedUrl(key)
+                if (downloadUrl == null) {
+                    call.respond(HttpStatusCode.NotFound, Response("Invalid FileId"))
+                } else {
+                    call.respond(HttpStatusCode.Found, DownloadPresignedUrlResponse(downloadUrl))
+                }
             }
         }
     }
@@ -97,4 +144,5 @@ fun Application.configureRouting() {
 
 data class NewUserRequestBody(val username: String)
 data class Response(val message: String)
-data class PresignedUrlResponse(val url: String, val fileId: String)
+data class UploadPresignedUrlResponse(val url: String, val fileId: String)
+data class DownloadPresignedUrlResponse(val url: String)
