@@ -46,3 +46,9 @@ dependencies {
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
 }
+
+ktor {
+    docker {
+        localImageName.set("moit151-kotlin")
+    }
+}
