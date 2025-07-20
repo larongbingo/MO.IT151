@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
@@ -26,21 +27,20 @@ enum class MoitScreen(val title: String) {
 }
 
 @Composable
-fun MoitApp(navController: NavHostController = rememberNavController()) {
-    NavHost(navController, startDestination = MoitScreen.LandingScreen.name) {
-        composable(route = MoitScreen.LandingScreen.name) {
-            LandingScreen(navController)
-        }
-        composable(route = MoitScreen.LoginScreen.name) {
-            LoginScreen()
-        }
-    }
-}
-
-@Composable
 @Preview
-fun App() {
+fun App(navController: NavHostController = rememberNavController(),
+    onNavHostReady: suspend (NavController) -> Unit = {}) {
     MaterialTheme {
-       MoitApp()
+        NavHost(navController, startDestination = MoitScreen.LandingScreen.name) {
+            composable(route = MoitScreen.LandingScreen.name) {
+                LandingScreen(navController)
+            }
+            composable(route = MoitScreen.LoginScreen.name) {
+                LoginScreen()
+            }
+        }
+        LaunchedEffect(navController) {
+            onNavHostReady(navController)
+        }
     }
 }
