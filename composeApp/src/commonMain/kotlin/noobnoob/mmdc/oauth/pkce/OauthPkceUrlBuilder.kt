@@ -1,5 +1,7 @@
 package noobnoob.mmdc.oauth.pkce
 
+import io.ktor.http.Parameters
+import io.ktor.http.parameters
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.Base64.PaddingOption
 import kotlin.random.Random
@@ -37,15 +39,13 @@ class OauthPkceUrlBuilder(
 
         val url = "https://$domain/oauth/token"
 
-        val body = OauthPkceAuthorizationGrantBody(
-            grant_type = grantType,
-            client_id = clientId,
-            code_verifier = codes.codeVerifier,
-            code = code,
-            redirect_uri = redirectUri
-        )
-
-        return OauthPkceAuthorizationGrantUrl(url, body)
+        return OauthPkceAuthorizationGrantUrl(url,  parameters {
+            append("redirect_uri", redirectUri)
+            append("code", code)
+            append("grant_type", grantType)
+            append("code_verifier", codes.codeVerifier)
+            append("client_id", clientId)
+        })
     }
 }
 
@@ -62,7 +62,7 @@ private fun String.cleanUpCodeString(): String =
 
 data class OauthPkceCodes(val codeVerifier: String, val codeChallenge: String)
 data class OauthPkceUrl(val url: String, val codes: OauthPkceCodes)
-data class OauthPkceAuthorizationGrantUrl(val url: String, val body: OauthPkceAuthorizationGrantBody)
+data class OauthPkceAuthorizationGrantUrl(val url: String, val body: Parameters)
 data class OauthPkceAuthorizationGrantBody(
     val grant_type: String,
     val client_id: String,

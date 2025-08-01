@@ -62,13 +62,7 @@ fun LoginScreen(navHostController: NavHostController) {
                                 val grantRequest = auth.buildGrantByAuthorizationUrl(authorizationCode)
                                 val response = client.submitForm(
                                     url = grantRequest.url,
-                                    formParameters = parameters {
-                                        append("redirect_uri", grantRequest.body.redirect_uri)
-                                        append("code", grantRequest.body.code)
-                                        append("grant_type", grantRequest.body.grant_type)
-                                        append("code_verifier", grantRequest.body.code_verifier)
-                                        append("client_id", grantRequest.body.client_id)
-                                    }
+                                    formParameters = grantRequest.body
                                 )
                                 val body = response.bodyAsText()
                                 // TODO: store JWT and Refresh Token
