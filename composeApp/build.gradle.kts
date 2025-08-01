@@ -70,6 +70,7 @@ kotlin {
             implementation("io.ktor:ktor-client-cio:3.2.3")
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.0-beta03")
             implementation("io.github.kevinnzou:compose-webview-multiplatform:2.0.1")
+            implementation("org.kotlincrypto.hash:sha2:0.7.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

@@ -2,6 +2,10 @@ package noobnoob.mmdc.oauth.pkce
 
 import io.ktor.http.Parameters
 import io.ktor.http.parameters
+import io.ktor.utils.io.charsets.Charset
+import io.ktor.utils.io.charsets.Charsets
+import io.ktor.utils.io.core.toByteArray
+import org.kotlincrypto.hash.sha2.SHA256
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.Base64.PaddingOption
 import kotlin.random.Random
@@ -52,7 +56,8 @@ class OauthPkceUrlBuilder(
 private fun generateCodeVerifierAndChallenge(): OauthPkceCodes {
     val bytes = Random.nextBytes(32)
     val codeVerifier = Base64.withPadding(PaddingOption.ABSENT).encode(bytes).cleanUpCodeString()
-    val codeChallenge = platformSha256(codeVerifier).cleanUpCodeString()
+    val hash = SHA256().digest(codeVerifier.toByteArray())
+    val codeChallenge = Base64.withPadding(PaddingOption.ABSENT).encode(hash).cleanUpCodeString()
     return OauthPkceCodes(codeVerifier, codeChallenge)
 }
 
