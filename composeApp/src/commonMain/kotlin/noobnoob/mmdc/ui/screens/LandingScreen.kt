@@ -21,7 +21,7 @@ fun LandingScreen(navController: NavHostController) {
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .padding(44.dp),
+            .padding(60.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
