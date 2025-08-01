@@ -21,9 +21,10 @@ import noobnoob.mmdc.ui.screens.LandingScreen
 import noobnoob.mmdc.ui.screens.LoginScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-enum class MoitScreen(val title: String) {
-    LandingScreen("Welcome Screen"),
-    LoginScreen("Login")
+enum class MoitScreen() {
+    LandingScreen,
+    LoginScreen,
+    App
 }
 
 @Composable
@@ -36,7 +37,7 @@ fun App(navController: NavHostController = rememberNavController(),
                 LandingScreen(navController)
             }
             composable(route = MoitScreen.LoginScreen.name) {
-                LoginScreen()
+                LoginScreen(navController)
             }
         }
         LaunchedEffect(navController) {
