@@ -16,15 +16,13 @@ import com.multiplatform.webview.web.rememberWebViewState
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.forms.submitForm
-import io.ktor.client.request.post
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
 import io.ktor.http.Url
-import io.ktor.http.contentType
-import io.ktor.http.parameters
 import kotlinx.coroutines.launch
+import moit151.composeapp.generated.resources.Res
+import moit151.composeapp.generated.resources.material_symbols_rounded_arrow_back
 import noobnoob.mmdc.oauth.pkce.OauthPkceUrlBuilder
-import noobnoob.mmdc.ui.Icons
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private val auth = OauthPkceUrlBuilder(
@@ -34,8 +32,6 @@ private val auth = OauthPkceUrlBuilder(
     audience = "https://MOIT151-Kotlin",
     scope = "openid offline_access"
 )
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,10 +86,10 @@ fun LoginScreen(navHostController: NavHostController) {
                 ),
                 navigationIcon = {
                     IconButton(
-                        onClick = { navHostController.popBackStack() }
+                        onClick = { navHostController.popBackStack() },
                     ) {
                         Icon(
-                            imageVector =  Icons.Arrow_back,
+                            painter = painterResource(Res.drawable.material_symbols_rounded_arrow_back),
                             contentDescription = "Navigate back"
                         )
                     }
@@ -111,4 +107,3 @@ fun LoginScreen(navHostController: NavHostController) {
         )
     }
 }
-
