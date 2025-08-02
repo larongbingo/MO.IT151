@@ -27,6 +27,8 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.launch
 import moit151.composeapp.generated.resources.Res
 import moit151.composeapp.generated.resources.material_symbols_rounded_arrow_back
+import noobnoob.mmdc.MoitScreen
+import noobnoob.mmdc.oauth.pkce.OauthPkceAuthenticationService
 import noobnoob.mmdc.oauth.pkce.OauthPkceUrlBuilder
 import noobnoob.mmdc.oauth.pkce.UserSession
 import noobnoob.mmdc.oauth.pkce.UserSessionResponse
@@ -40,6 +42,8 @@ private val auth = OauthPkceUrlBuilder(
     audience = "https://MOIT151-Kotlin",
     scope = "openid offline_access"
 )
+
+private val authService = OauthPkceAuthenticationService(auth)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,27 +62,17 @@ fun LoginScreen(navHostController: NavHostController) {
                         navigator.stopLoading()
 
                         val url = Url(request.url)
-
                         if (url.parameters.contains("code")) {
                             val authorizationCode = url.parameters["code"]!!
-                            val client = HttpClient {
-                                install(ContentNegotiation) {
-                                    json()
-                                }
-                            }
                             scope.launch {
-                                val grantRequest = auth.buildGrantByAuthorizationUrl(authorizationCode)
-                                val response = client.submitForm(
-                                    url = grantRequest.url,
-                                    formParameters = grantRequest.body
-                                )
-                                if (response.status.isSuccess()) {
-                                    val body = response.body<UserSessionResponse>()
-                                    UserSession.sessionToken = body.access_token
-                                    return@launch
+                                val sessionToken =
+                                    authService.fetchSessionTokensWithAuthorizationCode(authorizationCode)
+                                if (sessionToken != null) {
+                                    UserSession.sessionToken = sessionToken.access_token
+                                    navHostController.navigate(MoitScreen.App.name)
+                                } else {
+                                    navHostController.popBackStack() // TODO: add message on failed token grant authn flow
                                 }
-
-                                navHostController.popBackStack() // TODO: add message on failed token grant authn flow
                             }
                         } else if (url.parameters.contains("error_description")) {
                             navHostController.popBackStack() // TODO: pass error_description
@@ -124,3 +118,5 @@ fun LoginScreen(navHostController: NavHostController) {
         )
     }
 }
+
+
