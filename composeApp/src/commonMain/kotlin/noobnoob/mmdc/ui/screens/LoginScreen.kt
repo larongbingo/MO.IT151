@@ -40,7 +40,7 @@ private val auth = OauthPkceUrlBuilder(
     domain = "ewan.au.auth0.com",
     clientId = "h5m8clc3ztoWe0brx1qHZR9FDQ7GIltL",
     redirectUri = "https://localhost:7295/swagger/oauth2-redirect.html",
-    audience = "https://MOIT151-Kotlin",
+    audience = "https://ewan/api",
     scope = "openid offline_access"
 )
 

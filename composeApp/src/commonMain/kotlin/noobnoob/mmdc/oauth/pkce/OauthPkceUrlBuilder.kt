@@ -66,5 +66,4 @@ private fun String.cleanUpCodeString(): String =
 
 
 data class OauthPkceCodes(val codeVerifier: String, val codeChallenge: String)
-data class OauthPkceUrl(val url: String, val codes: OauthPkceCodes)
 data class OauthPkceAuthorizationGrantUrl(val url: String, val body: Parameters)

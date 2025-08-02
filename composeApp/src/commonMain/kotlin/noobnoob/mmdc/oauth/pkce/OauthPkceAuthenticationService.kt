@@ -6,17 +6,15 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.forms.submitForm
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
+import noobnoob.mmdc.api.MoitHttpClient
 
-class OauthPkceAuthenticationService(val urlBuilder: OauthPkceUrlBuilder) {
-    private val client = HttpClient {
-        install(ContentNegotiation) {
-            json()
-        }
-    }
-
+class OauthPkceAuthenticationService(
+    val urlBuilder: OauthPkceUrlBuilder,
+    val httpClient: HttpClient = MoitHttpClient.httpClient
+) {
     suspend fun fetchSessionTokensWithAuthorizationCode(authorizationCode: String): UserSessionResponse? {
         val request = urlBuilder.buildGrantByAuthorizationUrl(authorizationCode)
-        val response = client.submitForm(request.url, request.body)
+        val response = httpClient.submitForm(request.url, request.body)
 
         if (response.status.isSuccess()) {
             val body = response.body<UserSessionResponse>()
