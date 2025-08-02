@@ -68,11 +68,3 @@ private fun String.cleanUpCodeString(): String =
 data class OauthPkceCodes(val codeVerifier: String, val codeChallenge: String)
 data class OauthPkceUrl(val url: String, val codes: OauthPkceCodes)
 data class OauthPkceAuthorizationGrantUrl(val url: String, val body: Parameters)
-data class OauthPkceAuthorizationGrantBody(
-    val grant_type: String,
-    val client_id: String,
-    val code_verifier: String,
-    val code: String,
-    val redirect_uri: String
-)
-
