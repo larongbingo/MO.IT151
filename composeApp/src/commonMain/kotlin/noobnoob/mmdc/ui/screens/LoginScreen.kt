@@ -24,6 +24,7 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import moit151.composeapp.generated.resources.Res
 import moit151.composeapp.generated.resources.material_symbols_rounded_arrow_back
@@ -52,40 +53,7 @@ fun LoginScreen(navHostController: NavHostController) {
     val authState = rememberWebViewState(auth.buildAuthorizationUrl())
     val scope = rememberCoroutineScope()
     val navigationState = rememberWebViewNavigator(
-        requestInterceptor =
-            object : RequestInterceptor {
-                override fun onInterceptUrlRequest(
-                    request: WebRequest,
-                    navigator: WebViewNavigator
-                ): WebRequestInterceptResult {
-                    if (request.url.contains(auth.redirectUri)) {
-                        navigator.stopLoading()
-
-                        val url = Url(request.url)
-                        if (url.parameters.contains("code")) {
-                            val authorizationCode = url.parameters["code"]!!
-                            scope.launch {
-                                val sessionToken =
-                                    authService.fetchSessionTokensWithAuthorizationCode(authorizationCode)
-                                if (sessionToken != null) {
-                                    UserSession.sessionToken = sessionToken.access_token
-                                    navHostController.navigate(MoitScreen.App.name)
-                                } else {
-                                    navHostController.popBackStack() // TODO: add message on failed token grant authn flow
-                                }
-                            }
-                        } else if (url.parameters.contains("error_description")) {
-                            navHostController.popBackStack() // TODO: pass error_description
-                        } else {
-                            navHostController.popBackStack() // TODO: add generic error
-                        }
-
-                        return WebRequestInterceptResult.Reject
-                    }
-
-                    return WebRequestInterceptResult.Allow
-                }
-            }
+        requestInterceptor = LoginRequestInterceptor(scope, navHostController)
     )
 
     Scaffold(
@@ -119,4 +87,36 @@ fun LoginScreen(navHostController: NavHostController) {
     }
 }
 
+private class LoginRequestInterceptor(val scope: CoroutineScope, val navHostController: NavHostController) : RequestInterceptor {
+    override fun onInterceptUrlRequest(
+        request: WebRequest,
+        navigator: WebViewNavigator
+    ): WebRequestInterceptResult {
+        if (request.url.contains(auth.redirectUri)) {
+            navigator.stopLoading()
 
+            val url = Url(request.url)
+            if (url.parameters.contains("code")) {
+                val authorizationCode = url.parameters["code"]!!
+                scope.launch {
+                    val sessionToken =
+                        authService.fetchSessionTokensWithAuthorizationCode(authorizationCode)
+                    if (sessionToken != null) {
+                        UserSession.sessionToken = sessionToken.access_token
+                        navHostController.navigate(MoitScreen.App.name)
+                    } else {
+                        navHostController.popBackStack() // TODO: add message on failed token grant authn flow
+                    }
+                }
+            } else if (url.parameters.contains("error_description")) {
+                navHostController.popBackStack() // TODO: pass error_description
+            } else {
+                navHostController.popBackStack() // TODO: add generic error
+            }
+
+            return WebRequestInterceptResult.Reject
+        }
+
+        return WebRequestInterceptResult.Allow
+    }
+}
