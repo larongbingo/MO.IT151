@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import moit151.composeapp.generated.resources.Res
 import moit151.composeapp.generated.resources.material_symbols_rounded_arrow_back
 import noobnoob.mmdc.MoitScreen
+import noobnoob.mmdc.api.MoitWebApi
 import noobnoob.mmdc.oauth.pkce.OauthPkceAuthenticationService
 import noobnoob.mmdc.oauth.pkce.OauthPkceUrlBuilder
 import noobnoob.mmdc.oauth.pkce.UserSession
@@ -87,11 +88,11 @@ fun LoginScreen(navHostController: NavHostController) {
     }
 }
 
-private class LoginRequestInterceptor(val scope: CoroutineScope, val navHostController: NavHostController) : RequestInterceptor {
-    override fun onInterceptUrlRequest(
-        request: WebRequest,
-        navigator: WebViewNavigator
-    ): WebRequestInterceptResult {
+private class LoginRequestInterceptor(
+    val scope: CoroutineScope,
+    val navHostController: NavHostController,
+) : RequestInterceptor {
+    override fun onInterceptUrlRequest(request: WebRequest, navigator: WebViewNavigator) : WebRequestInterceptResult {
         if (request.url.contains(auth.redirectUri)) {
             navigator.stopLoading()
 
@@ -103,7 +104,12 @@ private class LoginRequestInterceptor(val scope: CoroutineScope, val navHostCont
                         authService.fetchSessionTokensWithAuthorizationCode(authorizationCode)
                     if (sessionToken != null) {
                         UserSession.sessionToken = sessionToken.access_token
-                        navHostController.navigate(MoitScreen.App.name)
+                        val user = MoitWebApi(sessionToken.access_token).getUser() // Goat says, this is prolly smelly since it blocks testability and tightly couples this func
+                        if (user == null) {
+                            navHostController.navigate(MoitScreen.FirstTimeLogin.name)
+                        } else {
+                            navHostController.navigate(MoitScreen.App.name)
+                        }
                     } else {
                         navHostController.popBackStack() // TODO: add message on failed token grant authn flow
                     }

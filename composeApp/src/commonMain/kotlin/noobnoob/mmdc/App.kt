@@ -17,6 +17,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import noobnoob.mmdc.ui.screens.FirstTimeLoginScreen
 import noobnoob.mmdc.ui.screens.LandingScreen
 import noobnoob.mmdc.ui.screens.LoginScreen
 import noobnoob.mmdc.ui.screens.MainApp
@@ -25,6 +26,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 enum class MoitScreen() {
     LandingScreen,
     LoginScreen,
+    FirstTimeLogin,
     App
 }
 
@@ -39,6 +41,9 @@ fun App(navController: NavHostController = rememberNavController(),
             }
             composable(route = MoitScreen.LoginScreen.name) {
                 LoginScreen(navController)
+            }
+            composable(route = MoitScreen.FirstTimeLogin.name) {
+                FirstTimeLoginScreen(navController)
             }
             composable(route = MoitScreen.App.name) {
                 MainApp(navController)

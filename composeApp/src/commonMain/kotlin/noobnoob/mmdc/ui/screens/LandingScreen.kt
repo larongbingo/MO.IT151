@@ -34,7 +34,6 @@ fun LandingScreen(navController: NavHostController) {
             onClick = { navController.navigate(MoitScreen.LoginScreen.name) },
             modifier = Modifier
                 .fillMaxWidth()
-
         ) {
             Text(text = "Login")
         }
